@@ -93,9 +93,7 @@ namespace Console
 
         private string ExtractFilePath()
         {
-            if (IsWindowStoreApp) UwpUtils.GetFilePath2(Handle);
-
-            return "";
+            return UwpUtils.GetFilePath2(Handle);
         }
     }
 }
