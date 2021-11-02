@@ -20,6 +20,7 @@ namespace Console
                 var filePath = window.FilePath;
                 var dirPath = Path.GetDirectoryName(filePath);
                 var xmlPath = Path.Join(dirPath, "AppxManifest.xml");
+
                 if( !File.Exists(xmlPath))
                     continue;
                 
