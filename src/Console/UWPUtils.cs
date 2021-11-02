@@ -1,9 +1,8 @@
 ﻿using System;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Epsis.EnifyEngine.Infrastructure.Utils
+namespace Console
 {
     internal struct WINDOWINFO
     {
@@ -14,77 +13,16 @@ namespace Epsis.EnifyEngine.Infrastructure.Utils
     /// <summary>
     /// https://stackoverflow.com/questions/32001621/how-to-get-the-application-name-from-hwnd-for-windows-10-store-apps-e-g-edge
     ///
-    /// TODO: Refactor
     /// </summary>
     public static class UwpUtils
     {
-        public static int GetChildProcessId(IntPtr windowHandle, uint processId)
-        {
-            var windowInfo = new WINDOWINFO();
-            windowInfo.ownerpid = processId;
-            windowInfo.childpid = windowInfo.ownerpid;
-
-            var pWindowinfo = Marshal.AllocHGlobal(Marshal.SizeOf(windowInfo));
-
-            Marshal.StructureToPtr(windowInfo, pWindowinfo, false);
-
-            var lpEnumFunc = new EnumWindowProc(EnumChildWindowsCallback);
-            EnumChildWindows(windowHandle, lpEnumFunc, pWindowinfo);
-
-            windowInfo = (WINDOWINFO)Marshal.PtrToStructure(pWindowinfo, typeof(WINDOWINFO));
-
-            Marshal.FreeHGlobal(pWindowinfo);
-
-            return (int) windowInfo.childpid;
-        }
-        
         public static string GetFilePath(IntPtr windowHandle)
         {
             if (windowHandle == IntPtr.Zero)
                 return null;
 
             GetWindowThreadProcessId(windowHandle, out var processId);
-
-            IntPtr proc;
-            if ((proc = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, false, (int)processId)) == IntPtr.Zero)
-                return null;
-
-            var capacity = 2000;
-            var sb = new StringBuilder(capacity);
-            QueryFullProcessImageName(proc, 0, sb, ref capacity);
-
-            var processName = sb.ToString(0, capacity);
-
-            // UWP apps are wrapped in another app called, if this has focus then try and find the child UWP process
-            if (Path.GetFileName(processName).Equals("ApplicationFrameHost.exe"))
-                processName = UWP_AppName(windowHandle, processId);
-
-            return processName;
-        }
-        
-        public static string GetFilePath2(IntPtr windowHandle)
-        {
-            if (windowHandle == IntPtr.Zero)
-                return null;
-
-            GetWindowThreadProcessId(windowHandle, out var processId);
             return UWP_AppName(windowHandle, processId);
-            
-            IntPtr proc;
-            if ((proc = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, false, (int)processId)) == IntPtr.Zero)
-                return null;
-
-            var capacity = 2000;
-            var sb = new StringBuilder(capacity);
-            QueryFullProcessImageName(proc, 0, sb, ref capacity);
-
-            var processName = sb.ToString(0, capacity);
-
-            // UWP apps are wrapped in another app called, if this has focus then try and find the child UWP process
-            if (Path.GetFileName(processName).Equals("ApplicationFrameHost.exe"))
-                processName = UWP_AppName(windowHandle, processId);
-
-            return processName;
         }
 
         
@@ -122,7 +60,6 @@ namespace Epsis.EnifyEngine.Infrastructure.Utils
         );
         #endregion
 
-   
 
         #region Get UWP Application Name
 

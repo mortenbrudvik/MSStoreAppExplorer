@@ -11,41 +11,30 @@ namespace Console
             var windows = WindowFactory.GetWindows(window =>
                 window.IsVisible && 
                 window.IsWindow && 
-                window.ClassName == "ApplicationFrameWindow");
+                window.ClassName == "ApplicationFrameWindow" &&
+                window.ProcessName.Contains("ApplicationFrameHost") 
+                );
 
             foreach (var window in windows)
             {
                 var filePath = window.FilePath;
                 var dirPath = Path.GetDirectoryName(filePath);
                 var xmlPath = Path.Join(dirPath, "AppxManifest.xml");
-                //var xml = File.ReadAllText(xmlPath);
+                if( !File.Exists(xmlPath))
+                    continue;
+                
                 var doc = XElement.Load(xmlPath);
 
                 var logo = doc.Descendants().SingleOrDefault(x => x.Name.LocalName == "Logo")?.Value;
-                
-                var protocols = doc.Descendants().Where(x => x.Name.LocalName == "Protocol");
-                
-                
-                
-                    
-                
+                var commands = doc.Descendants()
+                    .Where(x => x.Name.LocalName == "Protocol")
+                    .Select(x => x.Attribute("Name").Value);
 
-                
-                
-                
-                
                 System.Console.Out.WriteLine($"{window.Title}  | " +
-                                             $"{window.ClassName} | " +
-                                             $"{window.ProcessName} |  " +
-                                             $"{window.ProcessId} |  " +
+                                             $"{logo} |  " +
+                                             $"{string.Join(',', commands)} |  " +
                                              $"{window.FilePath}");
             }
-
-            System.Console.Out.WriteLine("");
         }
-        
-        private static bool IsHiddenWindowStoreApp(Window window)
-            => window.ClassName is "Windows.UI.Core.CoreWindow" && 
-               window.IsCloaked;
     }
 }

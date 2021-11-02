@@ -2,9 +2,7 @@
 using System.Linq;
 using System.Text;
 using Console.NativeMethods;
-using Epsis.EnifyEngine.Infrastructure.Utils;
 using PInvoke;
-using static Console.NativeMethods.DwmApiExt;
 using static PInvoke.User32;
 
 namespace Console
@@ -35,20 +33,6 @@ namespace Console
         public int ProcessId => _processId.Value;
         public string FilePath => _filePath.Value;
 
-        public bool IsMicrosoftStoreApplication => ClassName == "Windows.UI.Core.CoreWindow " ;
-
-        public bool IsWindowStoreApp { get; set; }
-
-        public bool IsCloaked
-        {
-            get
-            {
-                
-                DwmGetWindowAttribute(Handle, DWMWA_CLOAKED, out int cloaked, sizeof(int));
-                return cloaked != 0;
-            }
-        }
-
         public bool IsVisible => IsWindowVisible(Handle);
         public bool IsWindow => User32.IsWindow(Handle);
 
@@ -78,9 +62,6 @@ namespace Console
             {
                 GetWindowThreadProcessId(Handle, out var processId);
             
-                // if (IsMicrosoftStoreApplication)
-                //      processId = UwpUtils.GetChildProcessId(Handle, (uint) processId);
-            
                 return processId;
 
             }
@@ -93,7 +74,7 @@ namespace Console
 
         private string ExtractFilePath()
         {
-            return UwpUtils.GetFilePath2(Handle);
+            return UwpUtils.GetFilePath(Handle);
         }
     }
 }
